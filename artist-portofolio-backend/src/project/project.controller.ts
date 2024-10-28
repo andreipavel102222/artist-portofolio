@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -19,7 +21,6 @@ import { diskStorage } from 'multer';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 import { ProjectResponseDto } from './dto/project-response.dto';
-import { rmdir } from 'fs/promises';
 
 @Controller('projects')
 export class ProjectController {
@@ -27,6 +28,7 @@ export class ProjectController {
 
   @Post()
   @UseInterceptors(
+    // move in service
     FilesInterceptor('file', 10, {
       storage: diskStorage({
         destination: (req, file, cb) => {
@@ -44,8 +46,19 @@ export class ProjectController {
   )
   async createProject(
     @Body() createProjectDto: CreateUpdateProjectDto,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
+      }),
+    )
+    _file: Express.Multer.File[],
   ): Promise<Project> {
     return this.projectService.createProject(createProjectDto);
+  }
+
+  @Get('/visible')
+  getVisibleProjects(): Promise<ProjectResponseDto[]> {
+    return this.projectService.getVisibleProjects();
   }
 
   @Get('/:id')
@@ -65,7 +78,12 @@ export class ProjectController {
   updateProject(
     @Param('id') id: string,
     @Body() updateProjectDto: CreateUpdateProjectDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
+      }),
+    )
+    files: Express.Multer.File[],
   ): Promise<Project> {
     return this.projectService.updateProject(id, updateProjectDto, files);
   }

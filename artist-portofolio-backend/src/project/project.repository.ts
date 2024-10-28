@@ -44,4 +44,13 @@ export class ProjectRepository extends Repository<Project> {
     const projects = await query.getMany();
     return projects;
   }
+
+  async getVisibleProjects(): Promise<Project[]> {
+    let query = this.createQueryBuilder('project').where(
+      'project.status = :status',
+      { status: ProjectStatus.VISIBLE },
+    );
+    const projects = await query.getMany();
+    return projects;
+  }
 }

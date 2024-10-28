@@ -56,6 +56,22 @@ export class ProjectService {
     return projectsResponses;
   }
 
+  async getVisibleProjects(): Promise<ProjectResponseDto[]> {
+    const projects = await this.projectRepository.getVisibleProjects();
+
+    const projectsResponses = projects.map((project: Project) => {
+      return {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        link: project.link,
+        status: project.status,
+        imagesLink: this.getImagesLink(project.title),
+      };
+    });
+    return projectsResponses;
+  }
+
   async updateProject(
     id: string,
     updateProjectDto: CreateUpdateProjectDto,
