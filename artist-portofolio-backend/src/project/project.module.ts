@@ -5,9 +5,10 @@ import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 import { ProjectRepository } from './project.repository';
 import { FileService } from './files.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Project])],
+  imports: [TypeOrmModule.forFeature([Project]), AuthModule],
   controllers: [ProjectController],
   providers: [ProjectService, ProjectRepository, FileService],
 })

@@ -1,6 +1,10 @@
 import { DataSource, Repository } from 'typeorm';
 import { Project, ProjectStatus } from './project.entity';
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUpdateProjectDto } from './dto/create-update-project.dto';
 import { ProjectFilterDto } from './dto/project-filter.dto';
 
@@ -24,7 +28,15 @@ export class ProjectRepository extends Repository<Project> {
       status,
     });
 
-    await this.save(project);
+    try {
+      await this.save(project);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException('Project exists');
+      } else {
+        throw new InternalServerErrorException('Something went wrong');
+      }
+    }
     return project;
   }
 

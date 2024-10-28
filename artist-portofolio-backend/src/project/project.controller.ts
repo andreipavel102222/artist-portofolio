@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
@@ -19,6 +20,7 @@ import { Project } from './project.entity';
 import { ProjectFilterDto } from './dto/project-filter.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectResponseDto } from './dto/project-response.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 const fileFilter = (req, file, callback) => {
   const validTypes = ['image/jpeg', 'image/png'];
@@ -37,6 +39,7 @@ export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
   @Post()
+  @UseGuards(AuthGuard())
   @UseInterceptors(
     FilesInterceptor('file', 10, {
       fileFilter: fileFilter,
@@ -55,11 +58,13 @@ export class ProjectController {
   }
 
   @Get('/:id')
+  @UseGuards(AuthGuard())
   getProjectById(@Param('id') id: string): Promise<ProjectResponseDto> {
     return this.projectService.getProjectById(id);
   }
 
   @Get()
+  @UseGuards(AuthGuard())
   getProjects(
     @Query() projectDto: ProjectFilterDto,
   ): Promise<ProjectResponseDto[]> {
@@ -67,6 +72,7 @@ export class ProjectController {
   }
 
   @Put('/:id')
+  @UseGuards(AuthGuard())
   @UseInterceptors(FilesInterceptor('file', 10, { fileFilter: fileFilter }))
   updateProject(
     @Param('id') id: string,
@@ -82,6 +88,7 @@ export class ProjectController {
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard())
   deleteProjectById(@Param('id') id: string): Promise<void> {
     return this.projectService.deleteProjectById(id);
   }
