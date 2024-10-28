@@ -12,15 +12,16 @@ export class ProjectRepository extends Repository<Project> {
 
   async createProject(
     createProjectDto: CreateUpdateProjectDto,
+    image: string,
   ): Promise<Project> {
-    const { title, description, image, link } = createProjectDto;
+    const { title, description, link, status } = createProjectDto;
 
     const project = this.create({
       title,
       description,
       image,
       link,
-      status: ProjectStatus.VISIBLE,
+      status,
     });
 
     await this.save(project);
