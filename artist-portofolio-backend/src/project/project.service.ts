@@ -6,18 +6,26 @@ import { ProjectFilterDto } from './dto/project-filter.dto';
 import { join } from 'path';
 import { ProjectResponseDto } from './dto/project-response.dto';
 import * as fs from 'fs';
-import { rmdir, writeFile } from 'fs/promises';
-import { mkdirSync } from 'fs';
+import { FileService } from './files.service';
 
 @Injectable()
 export class ProjectService {
-  constructor(private projectRepository: ProjectRepository) {}
+  constructor(
+    private projectRepository: ProjectRepository,
+    private fileService: FileService,
+  ) {}
 
   async createProject(
     createProjectDto: CreateUpdateProjectDto,
+    files: Express.Multer.File[],
   ): Promise<Project> {
-    //refactorizat join(__dirname)
-    let image = join(__dirname, '..', '..', 'uploads', createProjectDto.title);
+    await this.fileService.createNewDirectory(
+      '',
+      createProjectDto.title,
+      files,
+    );
+
+    let image = this.fileService.getImagePath(createProjectDto.title);
     const project = this.projectRepository.createProject(
       createProjectDto,
       image,
@@ -33,7 +41,7 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
-    const imagesLink = this.getImagesLink(project.title);
+    const imagesLink = await this.fileService.getImagesLink(project.title);
     return { ...project, imagesLink };
   }
 
@@ -83,24 +91,15 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
-    const dirName = join(__dirname, '..', '..', 'uploads', project.title);
-    await rmdir(dirName, { recursive: true });
-
-    Object.assign(project, updateProjectDto);
-    project.image = join(
-      __dirname,
-      '..',
-      '..',
-      'uploads',
+    // await rmdir(dirName, { recursive: true });
+    await this.fileService.createNewDirectory(
+      project.title,
       updateProjectDto.title,
+      files,
     );
 
-    const uploadPath = join(__dirname, '..', '..', 'uploads', project.title);
-    mkdirSync(uploadPath, { recursive: true });
-
-    for (const file of files) {
-      await writeFile(`${uploadPath}/${file.originalname}`, file.buffer);
-    }
+    Object.assign(project, updateProjectDto);
+    project.image = this.fileService.getImagePath(updateProjectDto.title);
 
     await this.projectRepository.save(project);
     return project;
@@ -114,8 +113,7 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
-    const dirName = join(__dirname, '..', '..', 'uploads', project.title);
-    await rmdir(dirName, { recursive: true });
+    await this.fileService.removeDirectory(project.title);
   }
 
   private getImagesLink(title: string): string[] {

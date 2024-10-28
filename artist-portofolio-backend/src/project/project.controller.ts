@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,10 +18,19 @@ import { CreateUpdateProjectDto } from './dto/create-update-project.dto';
 import { Project } from './project.entity';
 import { ProjectFilterDto } from './dto/project-filter.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { mkdirSync } from 'fs';
-import { join } from 'path';
 import { ProjectResponseDto } from './dto/project-response.dto';
+
+const fileFilter = (req, file, callback) => {
+  const validTypes = ['image/jpeg', 'image/png'];
+  if (validTypes.includes(file.mimetype)) {
+    callback(null, true);
+  } else {
+    callback(
+      new BadRequestException('Only JPEG and PNG files are allowed!'),
+      false,
+    );
+  }
+};
 
 @Controller('projects')
 export class ProjectController {
@@ -28,32 +38,15 @@ export class ProjectController {
 
   @Post()
   @UseInterceptors(
-    // move in service
     FilesInterceptor('file', 10, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const folderName = req.body.title;
-          const uploadPath = join(__dirname, '..', '..', 'uploads', folderName);
-          mkdirSync(uploadPath, { recursive: true });
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          cb(null, file.originalname);
-        },
-      }),
-      limits: { fileSize: 5 * 1024 * 1024 }, // Limităm la 5 MB pe fișier
+      fileFilter: fileFilter,
     }),
   )
   async createProject(
     @Body() createProjectDto: CreateUpdateProjectDto,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
-      }),
-    )
-    _file: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<Project> {
-    return this.projectService.createProject(createProjectDto);
+    return this.projectService.createProject(createProjectDto, files);
   }
 
   @Get('/visible')
@@ -74,7 +67,7 @@ export class ProjectController {
   }
 
   @Put('/:id')
-  @UseInterceptors(FilesInterceptor('file', 10))
+  @UseInterceptors(FilesInterceptor('file', 10, { fileFilter: fileFilter }))
   updateProject(
     @Param('id') id: string,
     @Body() updateProjectDto: CreateUpdateProjectDto,
