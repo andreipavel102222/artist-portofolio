@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.login-wrapper{
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 25%;
+}
