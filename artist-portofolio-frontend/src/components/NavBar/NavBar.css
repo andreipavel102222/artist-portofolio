@@ -1,0 +1,9 @@
+.navbar{
+  display: flex;
+  flex-direction: row !important;
+  justify-content: center;
+}
+.toolbar {
+  max-width: 1300px;
+  width: 100%;
+}

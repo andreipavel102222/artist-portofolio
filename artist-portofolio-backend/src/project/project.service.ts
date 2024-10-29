@@ -41,9 +41,12 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
-    const imagesLink = await this.fileService.getImagesLink(project.title);
+    let imagesLink = await this.fileService.getImagesLink(project.title);
+
+    console.log(imagesLink);
     return { ...project, imagesLink };
   }
+  s;
 
   async getProjects(
     projectFilterDto: ProjectFilterDto,
@@ -117,6 +120,12 @@ export class ProjectService {
   }
 
   private getImagesLink(title: string): string[] {
-    return fs.readdirSync(join(__dirname, '..', '..', 'uploads', title));
+    let images = fs.readdirSync(join(__dirname, '..', '..', 'uploads', title));
+
+    images = images.map(
+      (link) => `http://localhost:3000/uploads/${title}/${link}`,
+    );
+
+    return images;
   }
 }

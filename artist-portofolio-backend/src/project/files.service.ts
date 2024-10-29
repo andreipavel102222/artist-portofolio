@@ -39,6 +39,10 @@ export class FileService {
     } catch (e) {
       throw new InternalServerErrorException('Something went wrong');
     }
+
+    images = images.map(
+      (link) => `http://localhost:3000/uploads/${title}/${link}`,
+    );
     return images;
   }
 

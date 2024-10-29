@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ProjectModule } from './project/project.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,6 +17,10 @@ import { AuthModule } from './auth/auth.module';
       database: 'project-portofolio',
       autoLoadEntities: true,
       synchronize: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Schimbă 'assets' cu numele folderului tău
+      serveRoot: '/uploads/', // Rădăcina de servire pentru accesul la imagini
     }),
     AuthModule,
   ],
