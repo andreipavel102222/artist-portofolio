@@ -1,16 +1,14 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
 import './NavBar.css'
 
 interface INavbar {
   position?: 'static' | 'fixed',
   buttonText: string,
   title: string,
-  link: string,
-  buttonHandler?: unknown,
+  buttonHandler?: () => void,
 }
 
-function NavBar({ position = 'fixed', buttonText, title, link }: INavbar) {
+function NavBar({ position = 'fixed', buttonText, title, buttonHandler }: INavbar) {
 
   return (
     <AppBar position={ position} className="navbar">
@@ -18,14 +16,14 @@ function NavBar({ position = 'fixed', buttonText, title, link }: INavbar) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        <Link to={link}>
-          <Button 
-            variant="outlined"
-            color="inherit"
-            aria-label="menu">
-              {buttonText}
-          </Button>
-        </Link>            
+        <Button 
+          variant="outlined"
+          color="inherit"
+          aria-label="menu"
+          onClick={buttonHandler}
+          >
+            {buttonText}
+        </Button>      
       </Toolbar>
     </AppBar>    
   )

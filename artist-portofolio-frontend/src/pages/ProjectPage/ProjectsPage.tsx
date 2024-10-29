@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ProjectCard, { IProjectCardProps } from '../../components/ProjectCard/ProjectCard';
 import './ProjectsPage.css'
 import NavBar from '../../components/NavBar/NavBar';
+import { AuthContext } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function ProjectsPage() {
   const [projects, setProjects] = useState<IProjectCardProps[]>([]);
+  const { token, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('http://localhost:3000/projects/visible')
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error('Something went wrong');
         }
         return response.json();
       })
@@ -23,9 +27,18 @@ function ProjectsPage() {
       });    
   }, [])
 
+  const buttonHandler = () => {
+    if(token === '') {
+      navigate('/login')
+    }
+    else{
+      logout();
+    }
+  }
+
   return (
     <div className="wrapper">
-      <NavBar position='static' buttonText='login as artist' title='Projects' link='/login'/>
+      <NavBar position='static' buttonText={token !== '' ? 'logout' : 'log in as artist'} title='Projects' buttonHandler={buttonHandler}/>
       <div className="container">
         <div className="components" style={{ width: '100%' }}>
           {
