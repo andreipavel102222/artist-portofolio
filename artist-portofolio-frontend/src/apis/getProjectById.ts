@@ -10,7 +10,6 @@ export function getProjectById(id: string | undefined, token: string | null, han
     },
   })
   .then((response) => {
-    console.log(response);
     return response.json();
   })
   .then((data) => {

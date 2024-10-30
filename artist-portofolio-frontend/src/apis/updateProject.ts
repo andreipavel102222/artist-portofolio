@@ -11,7 +11,6 @@ export function updateProject(id: string | undefined, token: string | null, form
     body: formData
   })
   .then((response) => {
-    console.log(response);
     return response.json();
   })
   .then((data) => {

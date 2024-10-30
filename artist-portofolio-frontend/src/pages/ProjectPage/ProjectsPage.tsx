@@ -17,13 +17,11 @@ function ProjectsPage() {
   const navigate = useNavigate();
 
   const handleError = (error: Error) => {
-    console.log(error);
     setErrorMessage(error.message);    
   }
 
   const deleteProject = (id: string) => {
     deleteProjectById(id, token, (data:  null | ErrorResponseDto) => {
-      console.log(data);
       if(data !== null && 'statusCode' in data) {
         if(data.statusCode === 401) {
           navigate('/login');    
@@ -41,7 +39,6 @@ function ProjectsPage() {
   const handleGetProjects = (data:  ProjectResponseDTO[] | ErrorResponseDto) => {
     if('statusCode' in data) {
       if(data.statusCode === 401) {
-        console.log(data.statusCode);
         navigate('/login');    
         return;
       }

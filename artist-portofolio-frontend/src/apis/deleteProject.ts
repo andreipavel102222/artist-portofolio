@@ -10,7 +10,6 @@ export function deleteProjectById(id: string | undefined, token: string | null, 
     },
   })
   .then((response) => {
-    console.log(response.headers.get('content-length'));
     return response.headers.get('content-length') === '0' ? null : response.json();
   })
   .then((data) => {

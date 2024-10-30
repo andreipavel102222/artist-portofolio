@@ -27,14 +27,14 @@ function LoginPage() {
       <div className="container login-wrapper">
         <div className="login-container">
             <LockOpenIcon fontSize="large" color="primary" sx={{ mt: 2, mb: 2}}/>
-            {errorMessage !== '' && <Alert severity="error" sx={{ minWidth: '100%',  boxSizing: 'border-box' }}>{errorMessage}</Alert>}
+            {errorMessage !== '' && <Alert severity="error" sx={{ minWidth: '100%',  boxSizing: 'border-box', mb: 2 }}>{errorMessage}</Alert>}
             <TextField 
               id="username"   
               label="Username"
               variant="outlined"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={{ width: '100%', mt: 2, mb: 2}}
+              sx={{ width: '100%'}}
             />
             <TextField 
               id="password"   

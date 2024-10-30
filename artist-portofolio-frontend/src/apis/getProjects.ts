@@ -17,7 +17,6 @@ export function getProjects(token: string | null, handle: (data:  ProjectRespons
     headers
   })
   .then((response) => {
-    console.log(response);
     return response.json();
   })
   .then((data) => {

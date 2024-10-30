@@ -48,7 +48,6 @@ function AddEditProjectPage() {
   const { id } = useParams();
 
   const handleError = (error: Error) => {
-    console.log(error);
     setErrorMessage(error.message);    
   }
 
@@ -111,7 +110,7 @@ function AddEditProjectPage() {
   return (
     <div className="wrapper" style={{  height: '100vh' }}>
       <NavBar title="Login">
-        <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/projects')}>go to projects</Button>
+        <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/')}>go to projects</Button>
         <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => logout()}>Logout</Button>      
       </NavBar>
       <div className="container login-wrapper">

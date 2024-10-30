@@ -2,8 +2,9 @@ import { Box, Button, Card, CardContent, CardMedia, IconButton, Typography } fro
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import './ProjectCard.css'
 
 export interface IProjectCardProps {
   id: string;
@@ -17,14 +18,27 @@ export interface IProjectCardProps {
 
 const ProjectCard = ({ id, title, description, imagesLink, link, deleteProject }: IProjectCardProps) => {
   const { token } = useContext(AuthContext);
+  const [imagesIndex, setImageIndex] = useState<number>(0);
   return (
-    <Card sx={{ display: 'flex', width: '100%', position: 'relative', mt: 4}}>
-      <CardMedia
-        component="img"
-        sx={{ width: '350px', height: '350px' }}
-        image={imagesLink[0]}
-        alt="Live from space album cover">
-      </CardMedia>    
+    <Card className="card">
+      <div className="image-container">
+        <CardMedia
+          component="img"
+          sx={{ width: '350px', height: '350px' }}
+          image={imagesLink[imagesIndex]}
+          alt="Live from space album cover">
+        </CardMedia>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', m: 1}}>
+          <IconButton  
+            onClick={() => setImageIndex(prevIndex => (prevIndex === 0) ? imagesLink.length - 1 : prevIndex - 1)}>
+            <ArrowBackIcon />
+          </IconButton>
+          <IconButton 
+            onClick={() => setImageIndex(prevIndex => (prevIndex === imagesLink.length - 1) ? 0 : prevIndex + 1)}>
+            <ArrowForwardIcon />
+          </IconButton>        
+        </Box>        
+      </div>    
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <CardContent sx={{ flex: '1 0 auto' }}>
           <Typography component="div" variant="h5">
@@ -62,14 +76,6 @@ const ProjectCard = ({ id, title, description, imagesLink, link, deleteProject }
           </Button>     
         }        
         </Box>
-      </Box>
-      <Box sx={{ display: 'flex', position: 'absolute', bottom: 0, left: 100 }}>
-        <IconButton aria-label="delete">
-          <ArrowBackIcon />
-        </IconButton>
-        <IconButton aria-label="delete">
-          <ArrowForwardIcon />
-        </IconButton>        
       </Box>
     </Card>
   );  

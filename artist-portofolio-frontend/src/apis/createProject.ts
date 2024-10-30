@@ -11,7 +11,6 @@ export function createProject(token: string | null, formData: FormData, handle: 
       body: formData
     })
     .then((response) => {
-      console.log(response);
       return response.json();
     })
     .then((data) => {

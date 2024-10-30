@@ -20,9 +20,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify(userData),
       });
       const res = await response.json();
-      console.log(res);
       if (res.accessToken) {
-        console.log('aaa');
         setToken(res.accessToken);
         localStorage.setItem("token", res.accessToken);
         navigate('/');
@@ -31,7 +29,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error(res.message);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.log(err);
       errorHandler(err.message);
     }
   }
