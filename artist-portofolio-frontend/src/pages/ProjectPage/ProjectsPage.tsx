@@ -11,7 +11,18 @@ function ProjectsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/projects/visible')
+    const url = `http://localhost:3000/projects/${token ? '' : 'visible'}`
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+  
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }    
+    fetch(url, {
+      method: 'GET',
+      headers
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error('Something went wrong');
@@ -36,13 +47,34 @@ function ProjectsPage() {
     }
   }
 
+  const deleteProject = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/projects/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Eroare la ștergerea datelor');
+      }
+
+      const newProjects = projects.filter(project => project.id !== id);
+      setProjects(newProjects);
+    } catch (error) {
+      console.error('Eroare:', error);
+    }    
+  }
+
   return (
     <div className="wrapper">
       <NavBar position='static' buttonText={token !== '' ? 'logout' : 'log in as artist'} title='Projects' buttonHandler={buttonHandler}/>
       <div className="container">
         <div className="components" style={{ width: '100%' }}>
           {
-            projects.map((project:IProjectCardProps) => <ProjectCard key={project.id} {...project}/>)
+            projects.map((project:IProjectCardProps) => <ProjectCard key={project.id} {...project} deleteProject={deleteProject}/>)
           }
         </div>
       </div>            

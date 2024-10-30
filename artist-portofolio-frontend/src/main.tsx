@@ -10,6 +10,7 @@ import App from './App';
 import ErrorPage from './pages/ErrorPage';
 import ProjectsPage from './pages/ProjectPage/ProjectsPage';
 import LoginPage from './pages/LoginPage/LoginPage';
+import AddEditProjectPage from './pages/AddProjectPage/AddEditProjectPage';
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,15 @@ const router = createBrowserRouter([
       {
         path: '/login',
         element: <LoginPage />
-      }             
+      },
+      {
+        path: '/edit/:id',
+        element: <AddEditProjectPage />
+      },
+      {
+        path: '/add',
+        element: <AddEditProjectPage />
+      }                   
     ]
   },
 ]);
