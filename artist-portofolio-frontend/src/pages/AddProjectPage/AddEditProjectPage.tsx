@@ -43,7 +43,7 @@ function AddEditProjectPage() {
   });
   const [names, setNames] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const { token } = useContext(AuthContext);
+  const { token, logout } = useContext(AuthContext);
   const navigate = useNavigate();  
   const { id } = useParams();
 
@@ -53,7 +53,7 @@ function AddEditProjectPage() {
   }
 
   const handleGetByIdRequest = (data:  ProjectResponseDTO | ErrorResponseDto) => {
-    if('error' in data) {
+    if('statusCode' in data) {
       if(data.statusCode === 401) {
         navigate('/login');    
         return;
@@ -79,7 +79,7 @@ function AddEditProjectPage() {
   }
 
   const handleRequest = (data: CreateEditProjectDto | ErrorResponseDto) => {
-    if('error' in data) {
+    if('statusCode' in data) {
       if(data.statusCode === 401) {
         navigate('/login');
         return;    
@@ -110,7 +110,10 @@ function AddEditProjectPage() {
 
   return (
     <div className="wrapper" style={{  height: '100vh' }}>
-      <NavBar title="Login" buttonText="Go to Projects" buttonHandler={() => navigate('/')}/>
+      <NavBar title="Login">
+        <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/projects')}>go to projects</Button>
+        <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => logout()}>Logout</Button>      
+      </NavBar>
       <div className="container login-wrapper">
         <div className="login-container">
           {errorMessage !== '' && <Alert severity="error" sx={{ minWidth: '100%',  boxSizing: 'border-box' }}>{errorMessage}</Alert>}

@@ -21,7 +21,9 @@ function LoginPage() {
 
   return (
     <div className="wrapper" style={{  height: '100vh' }}>
-      <NavBar title="Login" buttonText="Go to Projects" buttonHandler={() => navigate('/')}/>
+      <NavBar title="Login">
+        <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/')}>Go to projects</Button>
+      </NavBar>
       <div className="container login-wrapper">
         <div className="login-container">
             <LockOpenIcon fontSize="large" color="primary" sx={{ mt: 2, mb: 2}}/>

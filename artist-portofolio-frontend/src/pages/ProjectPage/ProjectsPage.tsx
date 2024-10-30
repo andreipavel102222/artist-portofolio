@@ -8,7 +8,7 @@ import { getProjects } from '../../apis/getProjects';
 import { ProjectResponseDTO } from '../../interfaces/ProjectResponseDTO';
 import ErrorResponseDto from '../../interfaces/ErrorResponseDTO';
 import { deleteProjectById } from '../../apis/deleteProject';
-import { Alert } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 
 function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectResponseDTO[]>([]);
@@ -21,19 +21,10 @@ function ProjectsPage() {
     setErrorMessage(error.message);    
   }
 
-  const buttonHandler = () => {
-    if(token === '') {
-      navigate('/login')
-    }
-    else{
-      logout();
-    }
-  }
-
   const deleteProject = (id: string) => {
     deleteProjectById(id, token, (data:  null | ErrorResponseDto) => {
       console.log(data);
-      if(data !== null && 'error' in data) {
+      if(data !== null && 'statusCode' in data) {
         if(data.statusCode === 401) {
           navigate('/login');    
           return;
@@ -48,8 +39,9 @@ function ProjectsPage() {
   }
 
   const handleGetProjects = (data:  ProjectResponseDTO[] | ErrorResponseDto) => {
-    if('error' in data) {
+    if('statusCode' in data) {
       if(data.statusCode === 401) {
+        console.log(data.statusCode);
         navigate('/login');    
         return;
       }
@@ -67,7 +59,11 @@ function ProjectsPage() {
 
   return (
     <div className="wrapper">
-      <NavBar position='static' buttonText={token !== '' ? 'logout' : 'log in as artist'} title='Projects' buttonHandler={buttonHandler}/>
+      <NavBar position='static' title='Projects'>
+        {token !== '' &&  <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/add')}>add project</Button>}
+        {token !== '' &&  <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => logout()}>Logout</Button>}
+        {token === '' &&  <Button aria-label="previous" variant="outlined" color="inherit" sx={{  m: 1 }} onClick={() => navigate('/login')}>Login as artist</Button>}
+      </NavBar>
       {errorMessage && 
         <div className="error-container">
           <Alert severity="error" sx={{ width: '100%', maxWidth: '1300px;', boxSizing: 'border-box' }}>{errorMessage}</Alert>
