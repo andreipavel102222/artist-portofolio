@@ -4,39 +4,19 @@ import './ProjectsPage.css'
 import NavBar from '../../components/NavBar/NavBar';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getProjects } from '../../apis/getProjects';
+import { ProjectResponseDTO } from '../../interfaces/ProjectResponseDTO';
+import ErrorResponseDto from '../../interfaces/ErrorResponseDTO';
+import { deleteProjectById } from '../../apis/deleteProject';
 
 function ProjectsPage() {
-  const [projects, setProjects] = useState<IProjectCardProps[]>([]);
+  const [projects, setProjects] = useState<ProjectResponseDTO[]>([]);
   const { token, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const url = `http://localhost:3000/projects/${token ? '' : 'visible'}`
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-  
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }    
-    fetch(url, {
-      method: 'GET',
-      headers
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Something went wrong');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-        setProjects(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });    
-  }, [])
+  const handleError = (error: Error) => {
+    console.log(error);
+  }
 
   const buttonHandler = () => {
     if(token === '') {
@@ -47,26 +27,39 @@ function ProjectsPage() {
     }
   }
 
-  const deleteProject = async (id: string) => {
-    try {
-      const response = await fetch(`http://localhost:3000/projects/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Eroare la ștergerea datelor');
+  const deleteProject = (id: string) => {
+    deleteProjectById(id, token, (data:  null | ErrorResponseDto) => {
+      console.log(data);
+      if(data !== null && 'error' in data) {
+        if(data.statusCode === 401) {
+          navigate('/login');    
+          return;
+        }
+        else{
+          throw new Error(data.message);
+        }
       }
-
       const newProjects = projects.filter(project => project.id !== id);
       setProjects(newProjects);
-    } catch (error) {
-      console.error('Eroare:', error);
-    }    
+    }, handleError)    
   }
+
+  const handleGetProjects = (data:  ProjectResponseDTO[] | ErrorResponseDto) => {
+    if('error' in data) {
+      if(data.statusCode === 401) {
+        navigate('/login');    
+        return;
+      }
+      else{
+        throw new Error(data.message);
+      }
+    }
+    setProjects(data);      
+  }
+
+  useEffect(() => {
+    getProjects(token, handleGetProjects, handleError)
+  }, [])
 
   return (
     <div className="wrapper">

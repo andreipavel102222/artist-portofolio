@@ -43,10 +43,15 @@ export class ProjectService {
 
     let imagesLink = await this.fileService.getImagesLink(project.title);
 
-    console.log(imagesLink);
-    return { ...project, imagesLink };
+    return {
+      id: project.id,
+      title: project.title,
+      description: project.description,
+      link: project.link,
+      status: project.status,
+      imagesLink,
+    };
   }
-  s;
 
   async getProjects(
     projectFilterDto: ProjectFilterDto,

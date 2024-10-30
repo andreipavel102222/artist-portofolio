@@ -4,124 +4,108 @@ import { useNavigate, useParams } from "react-router-dom";
 import MultipleFileUpload from "../../components/FileInput/MultipleFileUpload";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import CreateEditProjectDto from "../../interfaces/CreateEditProjectResponseDTO";
+import ErrorResponseDto from "../../interfaces/ErrorResponseDTO";
+import { createProject } from "../../apis/createProject";
+import { updateProject } from "../../apis/updateProject";
+import { getProjectById } from "../../apis/getProjectById";
+import { ProjectResponseDTO } from "../../interfaces/ProjectResponseDTO";
+
+interface IProjectInfo {
+  title: string,
+  description: string,
+  link: string, 
+  visible: boolean,
+  files: File[],
+}
+
+const getFormDataFromJSON = (projectInfo: IProjectInfo): FormData => {
+  const formData = new FormData();
+  formData.append('title', projectInfo.title);
+  formData.append('description', projectInfo.description);
+  formData.append('link', projectInfo.link);
+  formData.append('status', projectInfo.visible ? 'VISIBLE' : 'HIDDEN');
+  
+  projectInfo.files.forEach(file => {
+    formData.append('file', file);
+  })
+
+  return formData;
+}
 
 function AddEditProjectPage() {
-  const [title, setTile] = useState('');
-  const [description, setDescription] = useState('');
-  const [link, setLink] = useState('');
-  const [visible, setVisible] = useState(true);
-  const [files, setFiles] = useState<File[]>([]);
+  const [projectInfo, setProjectInfo] = useState<IProjectInfo>({
+    title: '',
+    description: '',
+    link: '',
+    visible: true,
+    files: [],
+  });
   const [names, setNames] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();  
   const { id } = useParams();
 
-  useEffect(() => {
-    if( id ){
-      fetch(`http://localhost:3000/projects/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      })
-        .then((response) => {
-          console.log(response);
-          return response.json();
-        })
-        .then((data) => {
-          if(data.error) {
-            throw new Error(data.message);
-          }
-          setTile(data.title);
-          setDescription(data.description);
-          setLink(data.link);
-          setVisible(data.visible === 'VISIBLE' ? true : false);
-          const newNames = data.imagesLink.map((link:string) => {
-            const arrLink = link.split('/');
-            return arrLink[arrLink.length - 1]
-          })
-          setNames(newNames);
-          console.log(title);
-          console.log(description);
-          console.log(link);
-          console.log(visible);
-        })
-        .catch((error) => {
-          console.log(error);
-          setErrorMessage(error.message);
-        });
-    }    
-  },[])
+  const handleError = (error: Error) => {
+    console.log(error);
+    setErrorMessage(error.message);    
+  }
+
+  const handleGetByIdRequest = (data:  ProjectResponseDTO | ErrorResponseDto) => {
+    if('error' in data) {
+      if(data.statusCode === 401) {
+        navigate('/login');    
+        return;
+      }
+      else{
+        throw new Error(data.message);
+      }
+    }
+    setProjectInfo((projectInfo) => { 
+      return  {
+        ...projectInfo,
+        title: data.title, 
+        description: data.description, 
+        link: data.link, 
+        visible: data.status === 'VISIBLE' ? true : false
+      }
+    });
+    const newNames = data.imagesLink.map((link:string) => {
+      const arrLink = link.split('/');
+      return arrLink[arrLink.length - 1]
+    })
+    setNames(newNames);        
+  }
+
+  const handleRequest = (data: CreateEditProjectDto | ErrorResponseDto) => {
+    if('error' in data) {
+      if(data.statusCode === 401) {
+        navigate('/login');
+        return;    
+      }
+      else{
+        throw new Error(data.message);
+      }
+    }
+    navigate('/');      
+  } 
 
   const addProject = () => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('link', link);
-    formData.append('status', visible ? 'VISIBLE' : 'HIDDEN');
-    files.forEach(file => {
-      formData.append('file', file);
-    })
-
-
-    fetch('http://localhost:3000/projects', {
-      method: 'POST',
-      headers: {
-        'Authorization' : `Bearer ${token}`
-      },
-      body: formData
-    })
-      .then((response) => {
-        console.log(response);
-        return response.json();
-      })
-      .then((data) => {
-        if(data.error) {
-          throw new Error(data.message);
-        }
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log(error);
-        setErrorMessage(error.message);
-      });       
+    const formData = getFormDataFromJSON(projectInfo);
+    createProject(token, formData, handleRequest, handleError)  
   }
 
   const editProject = () => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('link', link);
-    formData.append('status', visible ? 'VISIBLE' : 'HIDDEN');
-
-    files.forEach(file => {
-      formData.append('file', file);
-    })
-    
-    fetch(`http://localhost:3000/projects/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization' : `Bearer ${token}`
-      },
-      body: formData
-    })
-      .then((response) => {
-        console.log(response);
-        return response.json();
-      })
-      .then((data) => {
-        if(data.error) {
-          throw new Error(data.message);
-        }
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log(error);
-        setErrorMessage(error.message);
-      });     
+    const formData = getFormDataFromJSON(projectInfo);
+    updateProject(id, token, formData, handleRequest, handleError);
   }
+
+  useEffect(() => {
+    if( id ){
+      getProjectById(id, token,  handleGetByIdRequest, handleError)
+    }    
+  },[])
 
   return (
     <div className="wrapper" style={{  height: '100vh' }}>
@@ -133,8 +117,8 @@ function AddEditProjectPage() {
               id="title"   
               label="Title"
               variant="outlined"
-              value={title}
-              onChange={e => setTile(e.target.value)}
+              value={projectInfo.title}
+              onChange={e => setProjectInfo((projectInfo) => {return {...projectInfo, title: e.target.value}})}
               onFocus={() => setErrorMessage('')}
               sx={{ width: '100%', mt: 1, mb: 1}}
             />
@@ -144,8 +128,8 @@ function AddEditProjectPage() {
               variant="outlined"   
               multiline
               rows={6}
-              value={description}
-              onChange={e => setDescription(e.target.value)}     
+              value={projectInfo.description}
+              onChange={e => setProjectInfo((projectInfo) => {return {...projectInfo, description: e.target.value}})}
               onFocus={() => setErrorMessage('')}                   
               sx={{ width: '100%', mt: 1, mb: 1}}
             />
@@ -153,17 +137,17 @@ function AddEditProjectPage() {
               id="link"   
               label="Link"
               variant="outlined"
-              value={link}
-              onChange={e => setLink(e.target.value)}
+              value={projectInfo.link}
+              onChange={e => setProjectInfo((projectInfo) => {return {...projectInfo, link: e.target.value}})}
               onFocus={() => setErrorMessage('')}   
               sx={{ width: '100%', mt: 1, mb: 1}}
             />
             <FormControlLabel control={
-                <Switch checked={visible} onChange={(e) => setVisible(e.target.checked)} onFocus={() => setErrorMessage('')}   />
+                <Switch checked={projectInfo.visible} onChange={e => setProjectInfo((projectInfo) => {return {...projectInfo, visible: e.target.checked}})} onFocus={() => setErrorMessage('')}   />
               } 
               label="Visible" 
             />
-            <MultipleFileUpload files={files} setFiles={setFiles} names={names}/>
+            <MultipleFileUpload files={projectInfo.files} setFiles={(files) => setProjectInfo((projectInfo) => {return {...projectInfo, files: files}})} names={names}/>
             <Button 
               variant="contained"
               color="primary"
