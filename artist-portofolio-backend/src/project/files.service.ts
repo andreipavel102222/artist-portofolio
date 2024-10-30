@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { join } from 'path';
-import { rmdir, writeFile, mkdir, readdir } from 'fs/promises';
+import { rmdir, writeFile, mkdir, readdir, rename } from 'fs/promises';
 
 @Injectable()
 export class FileService {
@@ -44,6 +44,17 @@ export class FileService {
       (link) => `http://localhost:3000/uploads/${title}/${link}`,
     );
     return images;
+  }
+
+  async renameFolder(oldName: string, newName: string): Promise<void> {
+    try {
+      await rename(
+        join(__dirname, '..', '..', 'uploads', oldName),
+        join(__dirname, '..', '..', 'uploads', newName),
+      );
+    } catch (e) {
+      throw new InternalServerErrorException('Something went wrong');
+    }
   }
 
   getImagePath(title: string) {

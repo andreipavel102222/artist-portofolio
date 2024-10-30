@@ -94,15 +94,21 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
 
-    // await rmdir(dirName, { recursive: true });
-    await this.fileService.createNewDirectory(
-      project.title,
-      updateProjectDto.title,
-      files,
-    );
+    if (files.length > 0) {
+      await this.fileService.createNewDirectory(
+        project.title,
+        updateProjectDto.title,
+        files,
+      );
+    } else {
+      await this.fileService.renameFolder(
+        project.title,
+        updateProjectDto.title,
+      );
+    }
 
-    Object.assign(project, updateProjectDto);
     project.image = this.fileService.getImagePath(updateProjectDto.title);
+    Object.assign(project, updateProjectDto);
 
     await this.projectRepository.save(project);
     return project;

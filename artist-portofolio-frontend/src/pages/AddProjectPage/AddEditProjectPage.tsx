@@ -43,6 +43,10 @@ function AddEditProjectPage() {
             return arrLink[arrLink.length - 1]
           })
           setNames(newNames);
+          console.log(title);
+          console.log(description);
+          console.log(link);
+          console.log(visible);
         })
         .catch((error) => {
           console.log(error);
@@ -83,6 +87,40 @@ function AddEditProjectPage() {
         console.log(error);
         setErrorMessage(error.message);
       });       
+  }
+
+  const editProject = () => {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('link', link);
+    formData.append('status', visible ? 'VISIBLE' : 'HIDDEN');
+
+    files.forEach(file => {
+      formData.append('file', file);
+    })
+    
+    fetch(`http://localhost:3000/projects/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization' : `Bearer ${token}`
+      },
+      body: formData
+    })
+      .then((response) => {
+        console.log(response);
+        return response.json();
+      })
+      .then((data) => {
+        if(data.error) {
+          throw new Error(data.message);
+        }
+        navigate('/');
+      })
+      .catch((error) => {
+        console.log(error);
+        setErrorMessage(error.message);
+      });     
   }
 
   return (
@@ -131,7 +169,7 @@ function AddEditProjectPage() {
               color="primary"
               aria-label="menu"
               sx={{ width: '100%', mt: 1, mb: 1, height: '3.5em'}}
-              onClick={addProject}
+              onClick={() => id ? editProject() : addProject()}
               >
                 {id ? 'Edit project' : 'Add project'}
             </Button>

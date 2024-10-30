@@ -77,11 +77,7 @@ export class ProjectController {
   updateProject(
     @Param('id') id: string,
     @Body() updateProjectDto: CreateUpdateProjectDto,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: 'image/jpeg' })],
-      }),
-    )
+    @UploadedFiles()
     files: Express.Multer.File[],
   ): Promise<Project> {
     return this.projectService.updateProject(id, updateProjectDto, files);
