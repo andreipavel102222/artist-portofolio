@@ -8,14 +8,17 @@ import { getProjects } from '../../apis/getProjects';
 import { ProjectResponseDTO } from '../../interfaces/ProjectResponseDTO';
 import ErrorResponseDto from '../../interfaces/ErrorResponseDTO';
 import { deleteProjectById } from '../../apis/deleteProject';
+import { Alert } from '@mui/material';
 
 function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectResponseDTO[]>([]);
   const { token, logout } = useContext(AuthContext);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleError = (error: Error) => {
     console.log(error);
+    setErrorMessage(error.message);    
   }
 
   const buttonHandler = () => {
@@ -59,11 +62,17 @@ function ProjectsPage() {
 
   useEffect(() => {
     getProjects(token, handleGetProjects, handleError)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <div className="wrapper">
       <NavBar position='static' buttonText={token !== '' ? 'logout' : 'log in as artist'} title='Projects' buttonHandler={buttonHandler}/>
+      {errorMessage && 
+        <div className="error-container">
+          <Alert severity="error" sx={{ width: '100%', maxWidth: '1300px;', boxSizing: 'border-box' }}>{errorMessage}</Alert>
+        </div>
+      }
       <div className="container">
         <div className="components" style={{ width: '100%' }}>
           {

@@ -105,6 +105,7 @@ function AddEditProjectPage() {
     if( id ){
       getProjectById(id, token,  handleGetByIdRequest, handleError)
     }    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
   return (
